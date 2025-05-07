@@ -1,0 +1,5 @@
+./programa < [arquivo_de_entrada] > [arquivo_de_saída]
+
+ou
+
+./programa < [arquivo_de_entrada] | diff [arquivo_de_teste] -
