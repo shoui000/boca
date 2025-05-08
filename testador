@@ -1,0 +1,59 @@
+#!/usr/bin/zsh
+# COMPLETAMENTE FEITO NO CHATGPT
+
+# Função de ajuda
+usage() {
+    echo "Uso: $0 -d <diretório>"
+    exit 1
+}
+
+# Lê a flag -d ou --dir
+while [[ "$#" -gt 0 ]]; do
+    case $1 in
+        -d|--dir)
+            DIR="$2"
+            shift 2
+            ;;
+        *)
+            echo "Opção desconhecida: $1"
+            usage
+            ;;
+    esac
+done
+
+# Verifica se o diretório foi fornecido
+if [ -z "$DIR" ]; then
+    echo "Erro: diretório não especificado."
+    usage
+fi
+
+# Verifica se o diretório existe
+if [ ! -d "$DIR" ]; then
+    echo "Erro: diretório '$DIR' não existe."
+    exit 1
+fi
+
+# Executa os testes no diretório especificado
+(
+    cd "$DIR" || exit 1
+
+    if [ ! -x "./a.out" ]; then
+        echo "Erro: './a.out' não é executável ou não existe."
+        exit 1
+    fi
+
+    for input_file in input/test_*; do
+        test_name=$(basename "$input_file")
+        output_file="output/$test_name"
+
+        if [ ! -f "$output_file" ]; then
+            echo "Aviso: Arquivo de saída correspondente '$output_file' não encontrado. Pulando."
+            continue
+        fi
+
+        echo "🔎 Testando $test_name..."
+        ./a.out < "$input_file" | diff "$output_file" -
+        echo "-------------------------"
+    done
+)
+
