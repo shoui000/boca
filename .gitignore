@@ -1,6 +1,9 @@
 *.pdf
 *.zip
+
 a.out
+a.exe
+
 input/
 output/
 .vscode
