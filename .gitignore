@@ -2,7 +2,7 @@
 *.zip
 
 a.out
-a.exe
+*.exe
 
 input/
 output/
