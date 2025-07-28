@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define MAX_SIZE_PATH 1000
 #define MAX_ROADS 12
@@ -34,6 +35,8 @@ typedef struct {
   road roads[MAX_ROADS];
 } GAME;
 
+void readConfig(GAME *g, char *path);
+
 int main(int argc, char *argv[]) {
   if (argc < 2) {
     printf("ERRO: Informe o diretorio com os arquivos de configuracao.\n");
@@ -42,5 +45,58 @@ int main(int argc, char *argv[]) {
 
   GAME g;
 
+  // Passagem por referencia eu posso usar ne? Vinicius ensinou (Ensinou memo, n to passando fake)
+  readConfig(&g, argv[1]);
+
   exit(0);
+}
+
+void readConfig(GAME *g, char *path) {
+  char configPath[MAX_SIZE_PATH+20];
+  strcpy(configPath, path);
+  strcat(configPath, "/config_inicial.txt");
+
+  FILE *f;
+  f = fopen(configPath, "r");
+
+  if (f == NULL) {
+    printf("ERRO: Nao foi possivel abrir o arquivo \"%s\"\n", configPath);
+    exit(1);
+  }
+
+  // lendo o arquivo config_inicial.txt que possui a seguinte formatacao:
+  // animacao
+  // largura_mapa qtd_pistas
+  // direcao velocidade num_carro X1 X2 … Xn
+  // direcao velocidade num_carro X1 X2 … Xn
+  // G X_galinha vidas
+
+  fscanf(f, "%d\n", &g->animate);
+  int x;
+  fscanf(f, "%d %d\n", &g->mapWidth, &x);
+  g->roadsCount = x - UNUSABLE_ROADS;
+
+  char d;
+  for (int i = 0; i < g->roadsCount; i++) {
+    d = fgetc(f);
+
+    if (d == '\n') {
+      g->roads[i].carsCount = 0;
+      g->roads[i].speed = 0;
+      g->roads[i].direction = 0;
+      continue;
+    }
+
+    g->roads[i].direction = (d == 'D') ? 1 : -1;
+    fscanf(f, " %d %d", &g->roads[i].speed, &g->roads[i].carsCount);
+
+    for (int j = 0; j < g->roads[i].carsCount; j++) {
+      fscanf(f, "%d", &g->roads[i].cars[j].b);
+      fgetc(f);
+    }
+  }
+
+  fscanf(f, "G %d %d", &g->chicken.b, &g->chicken.lifes);
+  
+  fclose(f);
 }
