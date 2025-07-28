@@ -36,6 +36,7 @@ typedef struct {
 } GAME;
 
 void readConfig(GAME *g, char *path);
+void readSprites(GAME *g, char *path);
 
 int main(int argc, char *argv[]) {
   if (argc < 2) {
@@ -47,6 +48,7 @@ int main(int argc, char *argv[]) {
 
   // Passagem por referencia eu posso usar ne? Vinicius ensinou (Ensinou memo, n to passando fake)
   readConfig(&g, argv[1]);
+  readSprites(&g, argv[1]);
 
   exit(0);
 }
@@ -98,5 +100,31 @@ void readConfig(GAME *g, char *path) {
 
   fscanf(f, "G %d %d", &g->chicken.b, &g->chicken.lifes);
   
+  fclose(f);
+}
+
+void readSprites(GAME *g, char *path) {
+  char spritesPath[MAX_SIZE_PATH+20];
+  strcpy(spritesPath, path);
+  strcat(spritesPath, "/personagens.txt");
+  FILE *f;
+  f = fopen(spritesPath, "r");
+
+  if (f == NULL) {
+    printf("ERRO: Nao foi possivel abrir o arquivo \"%s\"\n", spritesPath);
+    exit(1);
+  }
+
+  for (int x = 0; x < MAX_SPRITES; x++) {
+    for (int i = 0; i < SPRITE_MAX_HEIGHT; i++) {
+      for (int j = 0; j < SPRITE_MAX_WIDTH; j++) {
+        g->sprites[x][i][j] = fgetc(f);
+      }
+
+      fgetc(f); // \r
+      fgetc(f); // \n
+    }
+  }
+
   fclose(f);
 }
