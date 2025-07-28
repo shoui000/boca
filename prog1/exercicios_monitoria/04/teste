@@ -1,0 +1,43 @@
+====== CYBERTEST - MENU ======
+1 - Cadastrar novo dispositivo
+2 - Listar dispositivos
+3 - Ordenar por vulnerabilidade
+4 - Sair
+Escolha: Codigo do dispositivo: Nota de vulnerabilidade: 
+====== CYBERTEST - MENU ======
+1 - Cadastrar novo dispositivo
+2 - Listar dispositivos
+3 - Ordenar por vulnerabilidade
+4 - Sair
+Escolha: Codigo do dispositivo: Nota de vulnerabilidade: 
+====== CYBERTEST - MENU ======
+1 - Cadastrar novo dispositivo
+2 - Listar dispositivos
+3 - Ordenar por vulnerabilidade
+4 - Sair
+Escolha: Lista de dispositivos cadastrados:
+Codigo: 10001 | Vulnerabilidade: 5.5
+Codigo: 10002 | Vulnerabilidade: 7.3
+
+====== CYBERTEST - MENU ======
+1 - Cadastrar novo dispositivo
+2 - Listar dispositivos
+3 - Ordenar por vulnerabilidade
+4 - Sair
+Escolha: Ordenando dispositivos...
+
+====== CYBERTEST - MENU ======
+1 - Cadastrar novo dispositivo
+2 - Listar dispositivos
+3 - Ordenar por vulnerabilidade
+4 - Sair
+Escolha: Lista de dispositivos cadastrados:
+Codigo: 10002 | Vulnerabilidade: 7.3
+Codigo: 10001 | Vulnerabilidade: 5.5
+
+====== CYBERTEST - MENU ======
+1 - Cadastrar novo dispositivo
+2 - Listar dispositivos
+3 - Ordenar por vulnerabilidade
+4 - Sair
+Escolha: Saindo do sistema...
