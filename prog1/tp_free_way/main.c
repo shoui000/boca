@@ -25,7 +25,7 @@ typedef struct {
 } chicken;
 
 typedef struct {
-  int animate, mapWidth, mapHeight, roadsCount;
+  int animate, mapWidth, mapHeight, roadsCount, score, iteration;
 
   chicken chicken;
   int spriteIndex;
@@ -41,6 +41,10 @@ GAME readSprites(GAME g, char *path);
 GAME startGame(char *path);
 int normalizeCoord(int base, int max, int min, int diff);
 void printMap(GAME g);
+GAME renderCharacters(GAME g);
+GAME update(GAME g, char action);
+GAME moveCars(GAME g);
+GAME moveChicken(GAME g);
 
 int main(int argc, char *argv[]) {
   if (argc < 2) {
@@ -50,19 +54,64 @@ int main(int argc, char *argv[]) {
 
   GAME g = startGame(argv[1]);
 
-  printMap(g);
+  char action;
+  while (1) {
+    printf("Pontos: %d | Vidas: %d | Iteracoes: %d\n", g.score, g.chicken.lifes, g.iteration);
+    printMap(g);
+    action = getchar();
+    getchar();
+
+    g = update(g, action);
+  }
 
   exit(0);
 }
 
-void printMap(GAME g) {
-  for (int i = 0; i < g.mapHeight; i++) {
-    for (int j = 0; j < g.mapWidth; j++) {
-      putchar(g.map[i][j]);
-    }
-
-    putchar('\n');
+GAME update(GAME g, char action) {
+  switch (action) {
+    case ' ':
+      g = moveCars(g);
+      break;
+    case 'w':
+      g.chicken.road--;
+      g = moveCars(g);
+      // testar colisao
+      break;
+    case 's':
+      if (g.chicken.road < g.roadsCount-1) {
+        g.chicken.road++;
+      }
+      g = moveCars(g);
+      // testar colisao
+      break;
+    default:
+      return g;
   }
+
+  g.iteration++;
+
+  g = renderCharacters(g);
+
+  return g;
+}
+
+GAME moveChicken(GAME g) {
+  g.chicken.a = normalizeCoord(g.chicken.a, g.mapWidth-2, 1, -1);
+  g.chicken.b = normalizeCoord(g.chicken.b, g.mapWidth-2, 1, -1);
+  g.chicken.c = normalizeCoord(g.chicken.c, g.mapWidth-2, 1, +1);
+  return g;
+}
+
+GAME moveCars(GAME g) {
+  for (int i = 0; i < g.roadsCount; i++) {
+    for (int j = 0; j < g.roads[i].carsCount; j++) {
+      g.roads[i].cars[j].a = normalizeCoord(g.roads[i].cars[j].a, g.mapWidth-2, 1, g.roads[i].speed * g.roads[i].direction);
+      g.roads[i].cars[j].b = normalizeCoord(g.roads[i].cars[j].b, g.mapWidth-2, 1, g.roads[i].speed * g.roads[i].direction);
+      g.roads[i].cars[j].c = normalizeCoord(g.roads[i].cars[j].c, g.mapWidth-2, 1, g.roads[i].speed * g.roads[i].direction);
+    }
+  }
+
+  return g;
 }
 
 GAME startGame(char *path) {
@@ -74,14 +123,14 @@ GAME startGame(char *path) {
   // Arrumando as coordenadas de cada elemento
   
   // // Galinha
-  g.chicken.a = normalizeCoord(g.chicken.b, g.mapWidth-1, 1, -1);
-  g.chicken.c = normalizeCoord(g.chicken.b, g.mapWidth-1, 1, +1);
+  g.chicken.a = normalizeCoord(g.chicken.b, g.mapWidth-2, 1, -1);
+  g.chicken.c = normalizeCoord(g.chicken.b, g.mapWidth-2, 1, +1);
 
   // // Carros
   for (int i = 0; i < g.roadsCount; i++) {
     for (int j = 0; j < g.roads[i].carsCount; j++) {
-      g.roads[i].cars[j].a = normalizeCoord(g.roads[i].cars[j].b, g.mapWidth-1, 1, -1);
-      g.roads[i].cars[j].c = normalizeCoord(g.roads[i].cars[j].b, g.mapWidth-1, 1, +1);
+      g.roads[i].cars[j].a = normalizeCoord(g.roads[i].cars[j].b, g.mapWidth-2, 1, -1);
+      g.roads[i].cars[j].c = normalizeCoord(g.roads[i].cars[j].b, g.mapWidth-2, 1, +1);
     }
   }
 
@@ -110,8 +159,54 @@ GAME startGame(char *path) {
     }
   }
 
+  g = renderCharacters(g);
+
   return g;
 }
+
+GAME renderCharacters(GAME g) {
+  for (int i = 0; i < g.roadsCount; i++) {
+    for (int j = 1; j < g.mapWidth-1; j++) {
+      g.map[(i * 3) + 1][j] = ' ';
+      g.map[(i * 3) + 2][j] = ' ';
+    }
+
+    for (int j = 0; j < g.roads[i].carsCount; j++) {
+      g.map[(i * 3) + 1][g.roads[i].cars[j].a] = g.sprites[g.spriteIndex][0][0];
+      g.map[(i * 3) + 2][g.roads[i].cars[j].a] = g.sprites[g.spriteIndex][1][0];
+      
+      g.map[(i * 3) + 1][g.roads[i].cars[j].b] = g.sprites[g.spriteIndex][0][1];
+      g.map[(i * 3) + 2][g.roads[i].cars[j].b] = g.sprites[g.spriteIndex][1][1];
+
+      g.map[(i * 3) + 1][g.roads[i].cars[j].c] = g.sprites[g.spriteIndex][0][2];
+      g.map[(i * 3) + 2][g.roads[i].cars[j].c] = g.sprites[g.spriteIndex][1][2];
+    }
+
+    if (i == g.chicken.road) {
+      g.map[(i * 3) + 1][g.chicken.a] = g.sprites[0][0][0];
+      g.map[(i * 3) + 2][g.chicken.a] = g.sprites[0][1][0];
+
+      g.map[(i * 3) + 1][g.chicken.b] = g.sprites[0][0][1];
+      g.map[(i * 3) + 2][g.chicken.b] = g.sprites[0][1][1];
+
+      g.map[(i * 3) + 1][g.chicken.c] = g.sprites[0][0][2];
+      g.map[(i * 3) + 2][g.chicken.c] = g.sprites[0][1][2];
+    }
+  }
+
+  return g;
+}
+
+void printMap(GAME g) {
+  for (int i = 0; i < g.mapHeight; i++) {
+    for (int j = 0; j < g.mapWidth; j++) {
+      putchar(g.map[i][j]);
+    }
+
+    putchar('\n');
+  }
+}
+
 
 int normalizeCoord(int base, int max, int min, int diff) {
   int res = base + diff;
@@ -174,6 +269,8 @@ GAME readConfig(GAME g, char *path) {
   fgets(buffer, 512, f);
   sscanf(buffer, "G %d %d", &g.chicken.b, &g.chicken.lifes);
   g.chicken.road = g.roadsCount-1;
+  g.score = 0;
+  g.iteration = 0;
 
   fclose(f);
 
@@ -194,15 +291,13 @@ GAME readSprites(GAME g, char *path) {
 
   for (int x = 0; x < MAX_SPRITES; x++) {
     for (int i = 0; i < SPRITE_MAX_HEIGHT; i++) {
-      for (int j = 0; j < SPRITE_MAX_WIDTH; j++) {
-        g.sprites[x][i][j] = fgetc(f);
-      }
-
-      fgetc(f); // \r
-      fgetc(f); // \n
+      fscanf(f, "%c%c%c\n", &g.sprites[x][i][0], &g.sprites[x][i][1], &g.sprites[x][i][2]);
     }
   }
 
   fclose(f);
+
+  g.spriteIndex = 1;
+
   return g;
 }
